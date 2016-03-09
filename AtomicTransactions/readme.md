@@ -23,7 +23,7 @@ onto Service Bus, and then we'll take a look at the code.
 ## What are Transactions?
 
 "Transactions" are execution scopes in the context of [transaction processing](https://en.wikipedia.org/wiki/Transaction_processing).
-A transaction groups two or more operations together. The goal of a transaction is that the result of this group of operations has a common outcome. 
+A transaction group has two or more operations together. The goal of a transaction is that the result of this group of operations has a common outcome. 
 A transaction coordinator or a transaction framework therefore ensures that the operations belonging to the group of operations 
 either jointly fail or jointly succeed and in this respect "act as one" - which is referred to as atomicity. 
 
@@ -127,7 +127,7 @@ capture the resulting output message on the same message log in a single atomic 
         
 ```
 
-The way you sent up such transfers is by creating a message sender that targets the destination queue "via" the 
+The way you set up such transfers is by creating a message sender that targets the destination queue "via" the 
 transfer queue. You will obviously also have a receiver that pulls messages from that same queue:  
 
 ```C#
@@ -327,15 +327,15 @@ helper class that is shown below. The C# compiler turns the rows into calls to t
 The initialization wires up the message handlers and define the message paths for positive and 
 negative outcomes to arrive at the flow graph shown above. 
 
-The helper creates a receiver object for ```taskQueueName```, and sender objects for the 
-```nextStepQueue`` and ```compensatorQueue```. Notice that these senders send **via** the
-```taskQueueName```, as discussed above.   
+The helper creates a receiver object for `taskQueueName`, and sender objects for the 
+`nextStepQueue` and `compensatorQueue`. Notice that these senders send **via** the
+`taskQueueName`, as discussed above.   
 
-It then registers an ````OnMessageAsync``` lambda on the receiver which will dispatch to the supplied 
+It then registers an `OnMessageAsync` lambda on the receiver which will dispatch to the supplied 
 callback method when a message has been obtained. The callback is invoked with the received message, and the 
 sender objects for next step and compensator, from which the invoked method can choose for how it wants to make progress.
 
-The method also registers with the ```CancellationToken``` handled by the containing object to ensure proper shutdown.
+The method also registers with the `CancellationToken` handled by the containing object to ensure proper shutdown.
 
 ``` C#
 public void Add(
@@ -360,14 +360,14 @@ public void Add(
 } 
 ```
 
-Once ```RunSaga``` returns, all receivers are active.      
+Once `RunSaga` returns, all receivers are active.      
  
 ### Business Transactions 
 
 The callback functions that represent the busines transactions are fairly uniform since we don't perform 
 true work in this sample. We will therefore only dissect one of the workers and one of the compensators.
 
-We'll pick ```BookHotel``` and ```CancelHotel``, because they are both in the middle of the flow.
+We'll pick `BookHotel` and `CancelHotel`, because they are both in the middle of the flow.
 
 ```C#
 public static async Task BookHotel(BrokeredMessage message, MessageSender nextStepQueue, MessageSender compensatorQueue)
@@ -379,7 +379,8 @@ public static async Task BookHotel(BrokeredMessage message, MessageSender nextSt
 To start, we'll pick up the "via" property from the incoming job message and add the id of this 
 job so that we can track the job progress.
  
-```C#        var via = (message.Properties.ContainsKey("Via")
+```C#        
+          var via = (message.Properties.ContainsKey("Via")
             ? ((string) message.Properties["Via"] + ",")
             : string.Empty) +
                     "bookhotel";
