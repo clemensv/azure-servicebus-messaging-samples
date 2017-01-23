@@ -1,4 +1,4 @@
-#Getting Started with Service Bus Queues
+# Getting Started with Service Bus Queues
 
 This sample shows the essential API elements for interacting with messages and a Service Bus Queue.
 
